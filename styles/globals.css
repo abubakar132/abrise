@@ -1231,6 +1231,10 @@ section { padding: 96px 0; }
   .nav { padding: 0 24px; }
   .nav-links { display: none; }
   section { padding: 64px 0; }
+  .vsl-section .container { padding: 0 18px; }
+  .vsl-wrap { padding: 18px; }
+  .vsl-frame { margin: 0 -4px; border-radius: 12px; }
+  .vsl-frame iframe { aspect-ratio: 4/3; }
   .hero-inner { grid-template-columns: 1fr; gap: 48px; }
   .hero-mockup { display: none; }
   .pain-layout { grid-template-columns: 1fr; }

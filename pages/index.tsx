@@ -421,7 +421,7 @@ export default function Home() {
             <li><a href="#audit">Audit</a></li>
             <li><a href="#">Privacy</a></li>
           </ul>
-          <div className="footer-copy">© 2025 Abrise · Built by Abu Bakar</div>
+          <div className="footer-copy">© 2026 Abrise · Built by Abu Bakar</div>
         </div>
       </footer>
 
