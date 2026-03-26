@@ -67,7 +67,6 @@ export default function ChatWidget() {
   useEffect(() => {
     const teaserTimer = setTimeout(() => setShowTeaser(true), 1600);
     const openTimer = setTimeout(() => {
-      setOpen(true);
       setWiggle(true);
     }, 3800);
     return () => {
