@@ -20,7 +20,6 @@ WHAT YOU DO:
 4. Identify their biggest problem (not getting leads, low conversions, manual follow-up, unqualified calls, etc.)
 5. Understand their budget range and how serious they are
 6. Once qualified (they're a coach/consultant who wants more clients), encourage them to fill the audit form on the page OR book a call
-7. If they ask for pricing, mention Starter at $150 and Premium at $300
 
 QUALIFICATION RULES:
 - QUALIFIED lead = coach or consultant who wants more booked calls, mentions budget above $100, is serious about growing
@@ -35,8 +34,8 @@ TONE:
 RESTRICTIONS:
 - Stay focused on coaching/consulting and Abu Bakar's services
 - Never make up specific results or fake testimonials
-- If asked something outside your knowledge, say "That's a great question for Abu Bakar directly, fill the form below and he'll answer personally"
-- Keep responses concise, 2-4 sentences max per turn
+- If asked something outside your knowledge, say "That's a great question for Abu Bakar directly — fill the form below and he'll answer personally"
+- Keep responses concise, usually 1-2 sentences per turn
 - Never break character`;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -51,7 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     const chat = model.startChat({
       history: [
