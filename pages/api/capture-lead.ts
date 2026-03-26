@@ -9,7 +9,9 @@ export interface LeadData {
   niche: string;
   situation: string; // 'new-website' | 'existing-website' | 'not-sure'
   challenge: string;
-  budget?: string;
+  pricing?: string;
+  presence?: { type: string; value: string }[];
+  leadSource?: 'website-form' | 'chat-widget';
   timestamp?: string;
 }
 
@@ -37,12 +39,14 @@ async function appendToSheet(lead: LeadData) {
       lead.niche,
       lead.situation,
       lead.challenge,
-      lead.budget || '',
+      lead.pricing || '',
+      (lead.presence || []).map((p) => `${p.type}: ${p.value}`).join(' | '),
+      lead.leadSource || 'website-form',
     ];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: 'Leads!A:H',
+      range: 'Leads!A:J',
       valueInputOption: 'USER_ENTERED',
       requestBody: { values: [row] },
     });
@@ -91,7 +95,9 @@ async function sendEmailNotification(lead: LeadData) {
             <tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Coaching Niche</td><td style="padding:10px 0;">${lead.niche}</td></tr>
             <tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Website Situation</td><td style="padding:10px 0;">${situationLabel[lead.situation] || lead.situation}</td></tr>
             <tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Biggest Challenge</td><td style="padding:10px 0;">${lead.challenge}</td></tr>
-            ${lead.budget ? `<tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Budget Range</td><td style="padding:10px 0;">${lead.budget}</td></tr>` : ''}
+            ${lead.pricing ? `<tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Budget / Pricing Context</td><td style="padding:10px 0;">${lead.pricing}</td></tr>` : ''}
+            ${(lead.presence || []).length ? `<tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Current Presence</td><td style="padding:10px 0;">${(lead.presence || []).map((p) => `${p.type}: ${p.value}`).join('<br/>')}</td></tr>` : ''}
+            <tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Lead Source</td><td style="padding:10px 0;">${lead.leadSource || 'website-form'}</td></tr>
             <tr><td style="padding:10px 0;color:#9A9490;font-size:0.85rem;vertical-align:top;">Submitted At</td><td style="padding:10px 0;">${new Date(lead.timestamp || Date.now()).toLocaleString()}</td></tr>
           </table>
           <div style="margin-top:28px;padding-top:20px;border-top:1px solid #2A2A30;text-align:center;">

@@ -21,9 +21,13 @@ const CHALLENGES = [
   "Other",
 ];
 
-const BUDGETS = ['Under $100', '$100 – $200', '$200 – $400', '$400+'];
-
 type Situation = 'new-website' | 'existing-website' | 'not-sure';
+type PresenceType = 'website' | 'linkedin' | 'instagram' | 'facebook' | 'youtube' | 'other';
+
+interface PresenceItem {
+  type: PresenceType;
+  value: string;
+}
 
 export default function AuditForm() {
   const [name, setName] = useState('');
@@ -32,10 +36,23 @@ export default function AuditForm() {
   const [niche, setNiche] = useState('');
   const [situation, setSituation] = useState<Situation | ''>('');
   const [challenge, setChallenge] = useState('');
-  const [budget, setBudget] = useState('');
+  const [pricing, setPricing] = useState('');
+  const [presence, setPresence] = useState<PresenceItem[]>([{ type: 'website', value: '' }]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+
+  const updatePresence = (idx: number, patch: Partial<PresenceItem>) => {
+    setPresence((prev) => prev.map((item, i) => (i === idx ? { ...item, ...patch } : item)));
+  };
+
+  const addPresence = () => {
+    setPresence((prev) => [...prev, { type: 'linkedin', value: '' }]);
+  };
+
+  const removePresence = (idx: number) => {
+    setPresence((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== idx)));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +63,25 @@ export default function AuditForm() {
     setError('');
     setSubmitting(true);
 
+    const cleanedPresence = presence
+      .map((item) => ({ ...item, value: item.value.trim() }))
+      .filter((item) => item.value);
+
     try {
       const res = await fetch('/api/capture-lead', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, phone, niche, situation, challenge, budget }),
+        body: JSON.stringify({
+          name,
+          email,
+          phone,
+          niche,
+          situation,
+          challenge,
+          pricing,
+          presence: cleanedPresence,
+          leadSource: 'website-form',
+        }),
       });
 
       if (!res.ok) throw new Error('Server error');
@@ -70,7 +101,7 @@ export default function AuditForm() {
           <h3>You're all set, {name.split(' ')[0]}!</h3>
           <p>
             Abu Bakar will personally review your details and send you a specific AI idea
-            for your situation — usually within a few hours.
+            for your situation, usually within a few hours.
           </p>
           <p style={{ marginTop: 12, fontSize: '0.82rem' }}>
             Keep an eye on <strong style={{ color: 'var(--gold)' }}>{email}</strong>
@@ -110,11 +141,11 @@ export default function AuditForm() {
 
       {/* Phone (optional) */}
       <div className="form-group">
-        <label className="form-label">WhatsApp Number (optional — for faster reply)</label>
+        <label className="form-label">WhatsApp Number (optional, for faster reply)</label>
         <input
           type="tel"
           className="form-input"
-          placeholder="+92 300 1234567"
+          placeholder="+1 (202) 555-0123"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -136,7 +167,7 @@ export default function AuditForm() {
         </select>
       </div>
 
-      {/* Situation — new vs existing */}
+      {/* Situation: new vs existing */}
       <div className="form-group">
         <label className="form-label">What's your website situation? *</label>
         <div className="radio-row">
@@ -172,20 +203,56 @@ export default function AuditForm() {
         </select>
       </div>
 
-      {/* Budget */}
+      {/* Current Presence */}
       <div className="form-group">
-        <label className="form-label">Rough investment budget? (helps Abu Bakar tailor his ideas)</label>
-        <div className="radio-row">
-          {BUDGETS.map((b) => (
-            <div
-              key={b}
-              className={`radio-opt ${budget === b ? 'selected' : ''}`}
-              onClick={() => setBudget(b)}
+        <label className="form-label">Where can I review your current presence? (optional)</label>
+        {presence.map((item, idx) => (
+          <div key={`${item.type}-${idx}`} className="presence-row">
+            <select
+              className="form-select"
+              value={item.type}
+              onChange={(e) => updatePresence(idx, { type: e.target.value as PresenceType })}
             >
-              {b}
-            </div>
-          ))}
-        </div>
+              <option value="website">Website</option>
+              <option value="linkedin">LinkedIn</option>
+              <option value="instagram">Instagram</option>
+              <option value="facebook">Facebook</option>
+              <option value="youtube">YouTube</option>
+              <option value="other">Other</option>
+            </select>
+            <input
+              type="text"
+              className="form-input"
+              placeholder="Paste URL or @handle"
+              value={item.value}
+              onChange={(e) => updatePresence(idx, { value: e.target.value })}
+            />
+            <button
+              type="button"
+              className="presence-remove"
+              onClick={() => removePresence(idx)}
+              aria-label="Remove presence field"
+              disabled={presence.length === 1}
+            >
+              Remove
+            </button>
+          </div>
+        ))}
+        <button type="button" className="presence-add" onClick={addPresence}>
+          + Add another profile
+        </button>
+      </div>
+
+      {/* Pricing */}
+      <div className="form-group">
+        <label className="form-label">What budget or pricing range are you considering? (free text)</label>
+        <input
+          type="text"
+          className="form-input"
+          placeholder="e.g. Around $500-$1,000, open to recommendation"
+          value={pricing}
+          onChange={(e) => setPricing(e.target.value)}
+        />
       </div>
 
       {error && (
@@ -195,7 +262,7 @@ export default function AuditForm() {
       )}
 
       <button type="submit" className="form-submit" disabled={submitting}>
-        {submitting ? 'Sending…' : 'Show Me My AI Idea — Free ✦'}
+        {submitting ? 'Sending…' : 'Show Me My AI Growth Idea ✦'}
       </button>
       <p className="form-fine">🔒 No spam. No pitch calls. Just one real, specific AI idea for your business.</p>
     </form>
